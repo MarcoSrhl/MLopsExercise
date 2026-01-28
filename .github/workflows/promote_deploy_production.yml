@@ -58,7 +58,7 @@ jobs:
               stage="Production",
               archive_existing_versions=True
           )
-          print(f"✅ Promoted {name} v{version} -> Production (archived old Production)")
+          print(f"Promoted {name} v{version} -> Production (archived old Production)")
           PY
 
   deploy_production:
@@ -78,4 +78,4 @@ jobs:
 
       - name: Deploy to production (placeholder)
         run: |
-          echo "Deploy step placeholder: SSH into prod host an
+          echo "Deploy step placeholder: SSH into prod host and run docker compose pull/up."

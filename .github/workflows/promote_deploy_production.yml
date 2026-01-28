@@ -1,0 +1,81 @@
+name: Promote + Deploy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      model_version:
+        description: "MLflow model version to promote to Production (e.g., 4)"
+        required: true
+        type: string
+      model_name:
+        description: "Registered model name"
+        required: false
+        default: "churn-model"
+        type: string
+
+jobs:
+  promote_to_production:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install MLflow client
+        run: |
+          pip install -U mlflow
+
+      - name: Promote model version to Production
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.DAGSHUB_MLFLOW_TRACKING_URI }}
+          MLFLOW_TRACKING_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          MODEL_NAME: ${{ inputs.model_name }}
+          MODEL_VERSION: ${{ inputs.model_version }}
+        run: |
+          python - << 'PY'
+          import os
+          import mlflow
+          from mlflow.tracking import MlflowClient
+
+          uri = os.environ["MLFLOW_TRACKING_URI"]
+          token = os.environ["MLFLOW_TRACKING_TOKEN"]
+          name = os.environ["MODEL_NAME"]
+          version = os.environ["MODEL_VERSION"]
+
+          mlflow.set_tracking_uri(uri)
+
+          # DagsHub basic auth: token used as user/pass
+          os.environ["MLFLOW_TRACKING_USERNAME"] = token
+          os.environ["MLFLOW_TRACKING_PASSWORD"] = token
+
+          client = MlflowClient()
+          client.transition_model_version_stage(
+              name=name,
+              version=version,
+              stage="Production",
+              archive_existing_versions=True
+          )
+          print(f"✅ Promoted {name} v{version} -> Production (archived old Production)")
+          PY
+
+  deploy_production:
+    needs: promote_to_production
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build + push backend image (production)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+          docker build -t "$DOCKERHUB_USERNAME/churn-backend:production" backend
+          docker push "$DOCKERHUB_USERNAME/churn-backend:production"
+
+      - name: Deploy to production (placeholder)
+        run: |
+          echo "Deploy step placeholder: SSH into prod host an

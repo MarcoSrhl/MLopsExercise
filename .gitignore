@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs / temp
+*.log
+*.tmp
+*.bak
+
+# Local env secrets
+.env
+.env.*
+*.env
+
+# ML / data artifacts (avoid pushing big stuff)
+data/
+datasets/
+artifacts/
+outputs/
+runs/
+mlruns/
+
+# DVC local cache (optional)
+.dvc/cache/

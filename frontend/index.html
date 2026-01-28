@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Model Stage Demo</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; padding: 16px; }
+    button { margin: 8px 8px 8px 0; }
+    pre { background: #f6f6f6; padding: 12px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Model Promotion Demo</h1>
+  <p>Calls <code>/health</code> and <code>/predict</code> on the backend.</p>
+
+  <button id="health">Check Health</button>
+  <pre id="healthOut"></pre>
+
+  <button id="predict">Send Predict</button>
+  <pre id="predOut"></pre>
+
+  <script>
+    const backend = "http://localhost:8000";
+
+    const healthOut = document.getElementById("healthOut");
+    const predOut = document.getElementById("predOut");
+
+    document.getElementById("health").onclick = async () => {
+      try {
+        const r = await fetch(`${backend}/health`);
+        const data = await r.json();
+        healthOut.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        healthOut.textContent = `Error: ${e}`;
+      }
+    };
+
+    document.getElementById("predict").onclick = async () => {
+      try {
+        // 10 features expected
+        const payload = {
+          features: [[0.1, 0.2, 0.0, 0.4, 0.5, 0.0, 0.2, 0.1, 0.3, 0.9]]
+        };
+
+        const r = await fetch(`${backend}/predict`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await r.json();
+        predOut.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        predOut.textContent = `Error: ${e}`;
+      }
+    };
+  </script>
+</body>
+</html>

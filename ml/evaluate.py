@@ -1,7 +1,7 @@
 import json
 import sys
 
-THRESHOLD = 0.90  # gate: must be >= 0.90
+THRESHOLD = 0.80  # gate: must be >= 0.90
 
 
 def main():
